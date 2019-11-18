@@ -12,7 +12,7 @@ function formatTime(dateVal){
   if(day < 10){
     day = `0${day}`
   }
-  return `${year}/${month}/${day}`
+  return `${year}-${month}-${day}`
 }
 /**
  * 批量生成日期函数

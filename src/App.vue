@@ -1,4 +1,4 @@
-<template>
+ <template>
   <div id="app">
     <el-form style="display:inline-block;float:left;width: 40%;margin-left: 5%; height:600px; padding-top: 120px;" ref="dynamicValidateForm" :model="dataFrom" label-width="200px">
       <el-row>
@@ -110,32 +110,15 @@ export default {
       };
       return week;
     },
-    getholidaysList(){
+    getholidaysList() {
       //得出节假日数组
-      this.holidaysList = []
-      let time = generateFun(new Date(this.dataFrom.legHolidays[0]),new Date(this.dataFrom.legHolidays[1]))
-      this.holidaysList = time
-
-      var dateMu = []
-      var Undate = []
-      if (this.dataFrom.legHolidaysMU.split(',').length>1){
-        dateMu = this.dataFrom.legHolidaysMU.split(',')
-      } else {
-        dateMu.push(this.dataFrom.legHolidaysMU)
-      }
-      // if (this.dataFrom.UnlegHolidays.split(',').length>1){
-      //   Undate = this.dataFrom.UnlegHolidays.split(',')
-      // } else {
-      //   Undate.push(this.dataFrom.UnlegHolidays)
-      // }
-      this.holidaysList.push(this.dataFrom.legHolidays[0])
-      this.holidaysList = this.holidaysList.concat(dateMu)
-    //  排除节假日加班记录
+      this.holidaysList = this.holidays
+      //  排除节假日加班记录
       let objectData = JSON.parse(JSON.stringify(this.workingAllDay))
       let arrayData = this.holidaysList
       let objectDataEX = {}
       Object.keys(this.workingAllDay).forEach(function(key){
-        for (var i =0;i<arrayData.length;i++){
+        for (var i = 0; i < arrayData.length; i++) {
           if (key === arrayData[i]) {
             objectDataEX[key] = objectData[key]
             delete objectData[key]
@@ -149,40 +132,41 @@ export default {
       Object.keys(objectData).forEach(function(key){
         var hour = objectData[key].split(':')[0]
         var minute = objectData[key].split(':')[1]
-        var time1,time2
+        var time1, time2
         hour = parseInt(hour)
         minute = parseInt(minute)
-        if (hour>=19) {
-          time1 = (hour - 19) *60 + minute
+        if (hour >= 19) {
+          time1 = (hour - 19) * 60 + minute
           allTime = allTime + time1
-        }else {
+        } else {
           time1 = '-'
         }
-        if (hour>19){
-          time2 = (hour - 19) *60 + parseInt(minute/30)*30
+        if (hour > 19) {
+          time2 = (hour - 19) * 60 + parseInt(minute / 30) * 30
           littleTime = littleTime + time2
-        }else {
+        } else {
           time2 = '-'
         }
-        dataA.push({date:key,time:objectData[key],first:time1,second:time2})
+        dataA.push({date: key, time: objectData[key], first: time1, second: time2})
       })
-      for (var i = 0; i<dataA.length;i++){
+      for (var i = 0; i < dataA.length; i++) {
         dataA[i]['week'] = this.getWeek(dataA[i]['date'])
         if (dataA[i]['week'] === '周六' || dataA[i]['week'] === '周日') {
-          if (this.dataFrom.UnlegHolidays.indexOf(dataA[i]['date'])) {
-            dataA[i]['first'] === '-'?dataA[i]['first']=480:dataA[i]['first']=480+dataA[i]['first']
-            dataA[i]['second'] === '-'?dataA[i]['second']=480:dataA[i]['second']=480+dataA[i]['second']
+          console.log('==',dataA[i])
+          if (this.upHolidays.indexOf(dataA[i]['date'])) {
+            dataA[i]['first'] === '-' ? dataA[i]['first'] = 480 : dataA[i]['first'] = 480 + dataA[i]['first']
+            dataA[i]['second'] === '-' ? dataA[i]['second'] = 480 : dataA[i]['second'] = 480 + dataA[i]['second']
             allTime = allTime + dataA[i]['first']
             littleTime = littleTime + dataA[i]['second']
           }
-         }
+        }
       }
-      dataA.unshift({date:'总计',time:'-',first:allTime,second:littleTime,week:'-'})
+      dataA.unshift({date: '总计', time: '-', first: allTime, second: littleTime, week: '-'})
       this.workingDay = dataA
 
     },
     getFinalReport () {
-      console.log(' this.holidaysList', this.holidaysList)
+      this.getholidaysList()
     },
     //处理天
     p(data){
@@ -195,7 +179,7 @@ export default {
     //处理月
     q(data){
       var a = data.split('/')
-      return a[0].toString() + '/' + this.p(a[1]).toString()
+      return a[0].toString() + '-' + this.p(a[1]).toString()
     },
     //上班
     readUpExcel(e){
@@ -277,23 +261,23 @@ export default {
                 for (let Once = 0; Once<arrayOnce.length;Once++){
                   if (arrayOnce[Once].indexOf('-') !== -1){
                     // 3-5类型数据拆分，且拼接
-                    let time = generateFun(new Date(this.q(persons[timeIndex]['月份']) + '/' + this.p(arrayOnce[Once].split('-')[0])), new Date(this.q(persons[timeIndex]['月份']) + '/' + this.p(arrayOnce[Once].split('-')[1])));
-                    time.push(this.q(persons[timeIndex]['月份']) + '/' + this.p(arrayOnce[Once].split('-')[0]))
+                    let time = generateFun(new Date(this.q(persons[timeIndex]['月份']) + '-' + this.p(arrayOnce[Once].split('-')[0])), new Date(this.q(persons[timeIndex]['月份']) + '-' + this.p(arrayOnce[Once].split('-')[1])));
+                    time.push(this.q(persons[timeIndex]['月份']) + '-' + this.p(arrayOnce[Once].split('-')[0]))
                     this.holidays = this.holidays.concat(time)
                   }else {
                     //  1、类型数据拼接
-                    this.holidays.push(this.q(persons[timeIndex]['月份']) + '/' + this.p(arrayOnce[Once]))
+                    this.holidays.push(this.q(persons[timeIndex]['月份']) + '-' + this.p(arrayOnce[Once]))
                   }
                 }
               }
               //只有连贯日期
               else if (persons[timeIndex]['法定节日'].indexOf('-') !== -1) {
                 // 3-5类型数据拆分，且拼接
-                let time = generateFun(new Date(this.q(persons[timeIndex]['月份']) + '/' + this.p(persons[timeIndex]['法定节日'].split('-')[0])), new Date(this.q(persons[timeIndex]['月份']) + '/' + this.p(persons[timeIndex]['法定节日'].split('-')[1])));
-                time.push(this.q(persons[timeIndex]['月份']) + '/' + this.p(persons[timeIndex]['法定节日'].split('-')[0]))
+                let time = generateFun(new Date(this.q(persons[timeIndex]['月份']) + '-' + this.p(persons[timeIndex]['法定节日'].split('-')[0])), new Date(this.q(persons[timeIndex]['月份']) + '-' + this.p(persons[timeIndex]['法定节日'].split('-')[1])));
+                time.push(this.q(persons[timeIndex]['月份']) + '-' + this.p(persons[timeIndex]['法定节日'].split('-')[0]))
                 this.holidays = this.holidays.concat(time)
               }else {
-                this.holidays.push(this.q(persons[timeIndex]['月份']) + '/' + this.p(persons[timeIndex]['法定节日']))
+                this.holidays.push(this.q(persons[timeIndex]['月份']) + '-' + this.p(persons[timeIndex]['法定节日']))
               }
             }
 
@@ -306,27 +290,28 @@ export default {
                 for (var Once = 0; Once<arrayOnce.length;Once++){
                   if (arrayOnce[Once].indexOf('-') !== -1){
                     // 3-5类型数据拆分，且拼接
-                    let time = generateFun(new Date(this.q(persons[timeIndex]['月份']) + '/' + this.p(arrayOnce[Once].split('-')[0])), new Date(this.q(persons[timeIndex]['月份']) + '/' + this.p(arrayOnce[Once].split('-')[1])));
-                    time.push(this.q(persons[timeIndex]['月份']) + '/' + this.p(arrayOnce[Once].split('-')[0]))
+                    let time = generateFun(new Date(this.q(persons[timeIndex]['月份']) + '-' + this.p(arrayOnce[Once].split('-')[0])), new Date(this.q(persons[timeIndex]['月份']) + '-' + this.p(arrayOnce[Once].split('-')[1])));
+                    time.push(this.q(persons[timeIndex]['月份']) + '-' + this.p(arrayOnce[Once].split('-')[0]))
                     this.upHolidays = this.upHolidays.concat(time)
                   }else {
                   //  1、类型数据拼接
-                    this.upHolidays.push(this.q(persons[timeIndex]['月份']) + '/' + this.p(arrayOnce[Once]))
+                    this.upHolidays.push(this.q(persons[timeIndex]['月份']) + '-' + this.p(arrayOnce[Once]))
                   }
                 }
               }
               //只有连贯日期
               else if (persons[timeIndex]['法定加班'].indexOf('-') !== -1) {
                 // 3-5类型数据拆分，且拼接
-                let time = generateFun(new Date(this.q(persons[timeIndex]['月份']) + '/' + this.p(persons[timeIndex]['法定加班'].split('-')[0])), new Date(this.q(persons[timeIndex]['月份']) + '/' + this.p(persons[timeIndex]['法定加班'].split('-')[1])));
-                time.push(this.q(persons[timeIndex]['月份']) + '/' + this.p(persons[timeIndex]['法定加班'].split('-')[0]))
+                let time = generateFun(new Date(this.q(persons[timeIndex]['月份']) + '-' + this.p(persons[timeIndex]['法定加班'].split('-')[0])), new Date(this.q(persons[timeIndex]['月份']) + '-' + this.p(persons[timeIndex]['法定加班'].split('-')[1])));
+                time.push(this.q(persons[timeIndex]['月份']) + '-' + this.p(persons[timeIndex]['法定加班'].split('-')[0]))
                 this.upHolidays = this.upHolidays.concat(time)
               }else {
-                this.upHolidays.push(this.q(persons[timeIndex]['月份']) + '/' + this.p(persons[timeIndex]['法定加班']))
+                this.upHolidays.push(this.q(persons[timeIndex]['月份']) + '-' + this.p(persons[timeIndex]['法定加班']))
               }
 
             }
           }
+          this.holidaysList = this.holidays
           console.log(this.holidays,this.upHolidays,'holidays')
         //  拼接节假日数据
 
