@@ -16,9 +16,75 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="24">
-          <el-button @click="getFinalReport">提交</el-button>
+        <el-col :span="22">
+          <el-form-item style="margin-left: -200px">
+            <el-button style="width: 140px;float: left;margin-left: 120px" size="small" type="primary" plain @click="getFinalReport">提 交 数 据</el-button>
+            <el-button style="width: 140px;float: left;margin-left: 20px" size="small" type="warning" plain @click="getF">刷 新 页 面</el-button>
+          </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
+        <ul style="border-style: dashed;margin-left: 80px; border-width: 0 0 1px 0; border-color: #e0e0e0;padding: 20px 40px 60px 30px;text-align: left; font-size:14px">
+          <li>
+            <div style="width: 50px; display: inline-block;">
+              <img class="picture" src="../N.jpg">
+            </div>
+            <div style="  display: inline-block;padding-bottom: 10px">
+              <span style="font-weight: bold; font-size: 15px;">小贴士&nbsp;</span>
+              <div style="border-radius:5px;background-color: #2c2825;width: 47px;height: 80%;display: inherit;"> <span style="color: #DFBA84;letter-spacing:2px; font-size: 12px">&nbsp;&nbsp;VIP</span> </div>
+              <br />
+              <span class="time">{{gettimeChange}}</span>
+            </div>
+            <p class="comment">
+              1.请点击对应按钮分别上传<span style="color: red"> 加班Excel文件 </span>与
+              <span style="color: red"> 节假日Excel文件 </span>。
+            </p>
+          </li>
+          <li>
+            <div style="width: 50px; display: inline-block;">
+              <img class="picture" src="../N.jpg">
+            </div>
+            <div style="  display: inline-block;padding-bottom: 10px">
+              <span style="font-weight: bold; font-size: 15px;">小贴士&nbsp;</span>
+             <br />
+              <span class="time">{{gettime}}</span>
+            </div>
+            <p class="comment">
+              2.确认文件无误后点击提交按钮。对应加班时长记录将展示在右侧表格中。
+            </p>
+          </li>
+          <li>
+            <div style="width: 50px; display: inline-block;">
+              <img class="picture" src="../N.jpg">
+            </div>
+            <div style="  display: inline-block;padding-bottom: 10px">
+              <span style="font-weight: bold; font-size: 15px;">小贴士&nbsp;</span>
+              <br />
+              <span class="time">{{gettime}}</span>
+            </div>
+            <p class="comment">
+              <span style="color: red"> 注</span>：节假日文件为目录中的<span style="color: red">法定加班日.xls</span>文件。现已记录2019年全年法定加班日和法定节日。如需计算范围更广的加班时长，请在N.excel文件中添加对应时间的
+              <span style="color: red">法定加班日</span>和<span style="color: red">法定节日</span>
+            </p>
+          </li>
+          <li>
+            <div style="width: 50px; display: inline-block;">
+              <img class="picture" src="../N.jpg">
+            </div>
+            <div style="  display: inline-block;padding-bottom: 10px">
+              <span style="font-weight: bold; font-size: 15px;">小贴士&nbsp;</span>
+               <br />
+              <span class="time">{{gettime}}</span>
+            </div>
+            <p class="comment" >
+              <span style="color: red;display: inline-block">节假日文件添加规则</span>：<br/>
+              <span>月份中输入格式为：2019/9</span><br/>
+              <span>法定节日中输入格式为：1、5-9(间隔时间用'、'，连续时间用'-')</span><br/>
+              <span>法定加班同法定节日格式</span><br/>
+              <span style="color: red;">不得修改Excel表头且需按格式输入新数据。否则影响计算。</span><br/>
+            </p>
+          </li>
+        </ul>
       </el-row>
     </el-form>
     <div style="display:inline-block;float:right;width: 40%;margin-right: 5%;height:600px;padding-top: 120px;">
@@ -54,6 +120,8 @@ import {generateFun}  from './api/timeFrame'
 export default {
   data () {
     return {
+      gettime:'',
+      gettimeChange:'',//当前时间
       dataFrom: {
         download: '',
         upload: '',
@@ -74,8 +142,39 @@ export default {
     this.$refs.download.addEventListener('change', e => {
       this.readDownExcel(e)
     })
+
+  },
+  created() {
+    this.currentTime();
+    this.getTime()
   },
   methods: {
+    getF(){
+      this.$router.go(0)
+    },
+    currentTime(){
+      setInterval(this.getTimeC,500)
+    },
+    getTime:function(){
+      var _this = this;
+      let yy = new Date().getFullYear();
+      let mm = new Date().getMonth()+1;
+      let dd = new Date().getDate();
+      let hh = new Date().getHours();
+      let mf = new Date().getMinutes()<10 ? '0'+new Date().getMinutes() : new Date().getMinutes();
+      let ss = new Date().getSeconds()<10 ? '0'+new Date().getSeconds() : new Date().getSeconds();
+      _this.gettime = yy+'-'+mm+'-'+dd+' '+hh+':'+mf+':'+ss;
+    },
+    getTimeC:function(){
+      var _this = this;
+      let yy = new Date().getFullYear();
+      let mm = new Date().getMonth()+1;
+      let dd = new Date().getDate();
+      let hh = new Date().getHours();
+      let mf = new Date().getMinutes()<10 ? '0'+new Date().getMinutes() : new Date().getMinutes();
+      let ss = new Date().getSeconds()<10 ? '0'+new Date().getSeconds() : new Date().getSeconds();
+      _this.gettimeChange = yy+'-'+mm+'-'+dd+' '+hh+':'+mf+':'+ss;
+    },
     getWeek(date){
       // 标准时间 Wed Jul 31 2019 00:00:00 GMT+0800 (中国标准时间)
       var _date = new Date(date);
@@ -152,7 +251,6 @@ export default {
       for (var i = 0; i < dataA.length; i++) {
         dataA[i]['week'] = this.getWeek(dataA[i]['date'])
         if (dataA[i]['week'] === '周六' || dataA[i]['week'] === '周日') {
-          console.log('==',dataA[i])
           if (this.upHolidays.indexOf(dataA[i]['date'])) {
             dataA[i]['first'] === '-' ? dataA[i]['first'] = 480 : dataA[i]['first'] = 480 + dataA[i]['first']
             dataA[i]['second'] === '-' ? dataA[i]['second'] = 480 : dataA[i]['second'] = 480 + dataA[i]['second']
@@ -312,7 +410,6 @@ export default {
             }
           }
           this.holidaysList = this.holidays
-          console.log(this.holidays,this.upHolidays,'holidays')
         //  拼接节假日数据
 
         } catch (e) {
@@ -344,5 +441,24 @@ export default {
     height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+  }
+  ul {
+    list-style-type: none;
+  }
+  .time{
+    color: #999;
+    vertical-align: top;
+    display: inline-block;
+    margin-top: 2px
+  }
+  .comment{
+   margin-top: 5px;
+    margin-bottom: 25px;
+    padding-left: 50px;
+  }
+  .picture{
+    width: 40px;
+    height: 40px;
+    border-radius:50%
   }
 </style>
